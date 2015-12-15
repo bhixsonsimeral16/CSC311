@@ -1,0 +1,300 @@
+<DOCTYPE html>
+
+<!-- Simulation of allocation of space on a disk. -->
+<!-- CSC311 Systems Software                      -->
+<!-- 14 December 2015                             -->
+
+<html>
+<h1><center><font color="3e1414">DISK SIMULATION</font></center></h1>
+<head>
+
+<style>
+
+body {
+  background: #82B4E8;
+}
+#mapHolder{
+}
+
+#mapOfDisk {
+  width: 512px;
+  height: 512px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 60px;
+  margin-bottom: 36px;
+  padding-left: 12px;
+  padding-right: 12px;
+  padding-top: 12px;
+  padding-bottom: 12px;
+  border-style: solid;
+  border-color: #000000;
+}
+
+</style>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script src="http://cdnjs.cloudflare.com/ajax/libs/bonsai/0.4/bonsai.min.js"></script>
+<script>
+
+var myGeometry = function() {
+      var CENTER_X = 256;
+      var CENTER_Y = 256;
+      var RADIUS = 225;
+      var SECTORS = 218;
+      var TRACKS = 3;
+
+      var computeBlockColors = function() {
+          var blocks;
+
+          var fraction;
+          var red;
+          var green;
+          var blue;
+          var alpha;
+
+          var count;
+          var i;
+          var j;
+
+
+          // RED_MAX, GREEN_MAX, BLUE_MAX must 
+          // have values between 0 and 255 (inclusive)
+          var RED_MAX = 0;
+          var GREEN_MAX = 192;
+          var BLUE_MAX = 225;
+
+          // Create 2-D array.
+          blocks = new Array( TRACKS );
+          for( i = 0; i < TRACKS; i++ ) {
+              blocks[i] = new Array( SECTORS );
+          } // for
+
+          for( i = 0; i < TRACKS; i++ ) {
+             
+          sector1 = Math.floor(SECTORS/6)
+          sector2 = Math.floor(SECTORS/6)
+          sector3 = Math.floor(SECTORS/6)
+          sector4 = Math.floor(SECTORS/6)
+          sector5 = Math.floor(SECTORS/6)
+          sector6 = Math.floor(SECTORS/6)
+          var remainder = SECTORS % 6;
+          if( remainder > 0 ) sector1++;
+          if( remainder > 1 ) sector3++;
+          if( remainder > 2 ) sector5++;
+          if( remainder > 3 ) sector2++;
+          if( remainder > 4 ) sector4++;
+              count = 0;
+              var redValue = 255;
+              var greenValue = 0;
+              var blueValue = 0;
+
+              for( j = 0; j < SECTORS; j++ ) {
+
+                fraction = (i * SECTORS + j)/(TRACKS * SECTORS);
+                alpha = 1.0;
+
+                if ( count < sector1 ){
+                greenValue += Math.floor(255/sector1);
+                                
+}
+                else if ( count < (sector1 + sector2) ){
+                redValue -= Math.floor(255/sector2);
+                                
+}
+                else if ( count < (sector1 + sector2 + sector3) ){
+                blueValue += Math.floor(255/sector3);
+                                
+}
+                else if ( count < (sector1 + sector2 + sector3 + sector4) ){
+                greenValue -= Math.floor(255/sector4);
+                                
+}
+                else if ( count < (sector1 + sector2 + sector3 + sector4 + sector5) ){
+                redValue += Math.floor(255/sector5);
+                                
+}
+                else if ( count < (sector1 + sector2 + sector3 + sector4 + sector5 + sector6) ){
+                blueValue -= Math.floor(255/sector6);
+                                
+}
+                if( count == sector1 - 1) greenValue = 255;
+                if( count == sector1 + sector2 - 1) redValue = 0;
+                if( count == sector1 + sector2 + sector3 - 1) blueValue = 255;
+                if( count == sector1 + sector2 + sector3 + sector4 - 1) greenValue = 0;
+                if( count == sector1 + sector2 + sector3 + sector4 + sector5 - 1) redValue = 255;
+                if( count == sector1 + sector2 + sector3 + sector4 + sector5 + sector6 - 1) blueValue = 0;
+
+                //console.log("RED: " + redValue + "  GREEN:" + greenValue + "  BLUE:" + blueValue + "  COUNT:" + count);
+                //console.log(sector1 - 1);
+
+                blocks[i][j] = new color.RGBAColor( redValue, greenValue, blueValue,  alpha );
+                count++;
+            } // for
+          } // for
+
+          return blocks;
+      }; // computeBlockColors()
+
+      var computeGeometry = function( blockColors ) {
+          var shapes = [];
+          var path;
+          var blockDescription;
+          var i;
+          var j;
+
+          var angleIncrement;
+          var startAngle;
+          var endAngle;
+          var radiusIncrement;
+          var innerRadius;
+          var outerRadius;
+          var innerArc;
+          var outerArc;
+
+          var x0;
+          var y0;
+          var x1;
+          var y1;
+          var x2;
+          var y2;
+          var x3;
+          var y3;
+
+          angleIncrement = (2.0 * Math.PI)/SECTORS;
+          startAngle = 0;
+          endAngle = startAngle + angleIncrement;
+          radiusIncrement = RADIUS/(2.0 * TRACKS);
+          innerRadius = RADIUS/2.0;
+          outerRadius = innerRadius + radiusIncrement;
+      
+          for( i = 0; i < TRACKS; i++ ) {
+              for( j = 0; j < SECTORS; j++ ) {
+
+                  x0 = CENTER_X + innerRadius * Math.cos( startAngle );
+                  y0 = CENTER_Y + innerRadius * Math.sin( startAngle );
+                  x1 = CENTER_X + innerRadius * Math.cos( endAngle );
+                  y1 = CENTER_Y + innerRadius * Math.sin( endAngle );
+                  x2 = CENTER_X + outerRadius * Math.cos( endAngle );
+                  y2 = CENTER_Y + outerRadius * Math.sin( endAngle );
+                  x3 = CENTER_X + outerRadius * Math.cos( startAngle );
+                  y3 = CENTER_Y + outerRadius * Math.sin( startAngle );
+
+                  console.log( "id = index" + (i * SECTORS + j));
+
+                  path = new Path()
+                    .moveTo( x0, y0 )
+                    .arcTo( innerRadius, innerRadius, 0, 0, 1, x1, y1 )
+                    .lineTo( x2, y2 )
+                    .arcTo( outerRadius, outerRadius, 0, 0, 0, x3, y3 )
+                    .lineTo( x0, y0 )
+                    .closePath()
+                    .addTo( stage )
+                    .attr( 'strokeWidth', 1 )
+                    .attr( 'fillColor', blockColors[i][j] );
+
+                  blockDescription = {
+                    track: i,
+                    sector: j,
+                    color: blockColors[i][j].rgb(),
+                    shape: path
+                  };
+                  shapes.push( blockDescription );
+
+                  startAngle += angleIncrement;
+                  endAngle += angleIncrement;
+              } // for
+              startAngle = 0.0;
+              endAngle = startAngle + angleIncrement;
+              innerRadius += radiusIncrement;
+              outerRadius += radiusIncrement;
+          } // for
+
+         return shapes;
+      }; // computeGeometry()
+
+     var arrayOfBlockDescriptors = computeGeometry( computeBlockColors() );
+     var numberOfBlockDescriptors = arrayOfBlockDescriptors.length;
+     var index = 0;
+     var flash = function() {
+      // arrayOfBlockDescriptors[index].shape.fill( arrayOfBlockDescriptors[index].color );
+       if( index < numberOfBlockDescriptors ){
+         arrayOfBlockDescriptors[index].shape.fill( '#FFFFFF');
+         index ++;
+         arrayOfBlockDescriptors[index].shape.fill( '#000000');
+       }
+     };
+
+     setInterval( flash, 25 );
+
+//this will create a bunch of randomly sized programs
+//and push them into an array
+//max file size is 1Mb
+    var programArray = [];
+    var programNumber = Math.ceil(Math.random * 400);
+    var createPrograms = function(){
+      for(var i = 0; i < programNumber; i++){
+        var program = {
+          id : i + 1,
+          size : Math.ceil(Math.random() * 1048576)
+        };
+        programArray.push(program);
+      }
+    }
+
+//this will attempt to allocate the disk with memory
+//block size is 4 Kb
+    var index2 = 0;
+    var blockSize;
+    var remainder;
+    var fill = function( programList ){
+      for(var j = 0; j < programList.length; j++){
+        remainder = false;
+        blockSize = Math.floor( programList[j].size/4096 );
+        if( blockSize + index2 > numberOfBlockDescriptors ){
+          break;
+        }
+        if( programList[j].size/4096 != 0 ){
+          remainder = true;
+          for(var k = 0; k < blockSize; k++){
+            arrayOfBlockDescriptors[index2].shape.fill( '#FFFFFF');
+            index2++;
+          }
+        }
+        if( remainder ){
+          arrayOfBlockDescriptors[index2].shape.fill( '#FF0000');
+          index2++;
+        }
+        else{
+          arrayOfBlockDescriptors[index2].shape.fill( '#FFFFFF');
+          index2++;
+        }
+      }
+    }
+
+//call the fill function so that it runs 
+//after the disk is cleaned
+  if( index >= numberOfBlockDescriptors ){
+    fill(programArray);
+  }
+}; // myGeometry()
+
+var myDraw = function() {
+  bonsai.run(document.getElementById('mapOfDisk'), {
+    code: myGeometry,
+    width: 768,
+    height: 768
+  });
+}; // myDraw()
+
+$( document ).ready( myDraw );
+</script>
+
+</head>
+
+<body>
+
+<div id="mapOfDisk"></div>
+<p><center> This produces a rainbow gradient. </center></p>
+</body>
+</html>
