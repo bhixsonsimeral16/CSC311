@@ -180,7 +180,7 @@ var myGeometry = function() {
                   x3 = CENTER_X + outerRadius * Math.cos( startAngle );
                   y3 = CENTER_Y + outerRadius * Math.sin( startAngle );
 
-                  console.log( "id = index" + (i * SECTORS + j));
+                  //console.log( "id = index" + (i * SECTORS + j));
 
                   path = new Path()
                     .moveTo( x0, y0 )
@@ -213,43 +213,77 @@ var myGeometry = function() {
          return shapes;
       }; // computeGeometry()
 
-     var arrayOfBlockDescriptors = computeGeometry( computeBlockColors() );
-     var numberOfBlockDescriptors = arrayOfBlockDescriptors.length;
-     var index = 0;
-     var flash = function() {
-      // arrayOfBlockDescriptors[index].shape.fill( arrayOfBlockDescriptors[index].color );
-       if( index < numberOfBlockDescriptors ){
-         arrayOfBlockDescriptors[index].shape.fill( '#FFFFFF');
-         index ++;
-         arrayOfBlockDescriptors[index].shape.fill( '#000000');
-       }
-     };
 
-     setInterval( flash, 25 );
-
-//this will create a bunch of randomly sized programs
-//and push them into an array
-//max file size is 1Mb
+    //this will create a bunch of randomly sized programs
+    //and push them into an array
+    //max file size is 1Mb
     var programArray = [];
-    var programNumber = Math.ceil(Math.random * 400);
-    var createPrograms = function(){
+    var programNumber = Math.ceil(Math.random() * 400);
+    function createPrograms(){
       for(var i = 0; i < programNumber; i++){
         var program = {
           id : i + 1,
-          size : Math.ceil(Math.random() * 1048576)
+          size : Math.ceil(Math.random() * 65536)
         };
         programArray.push(program);
       }
     }
+    createPrograms();
+    var blockSize;
+    var remainder;
+    var arrayOfBlockDescriptors = computeGeometry( computeBlockColors() );
+    var numberOfBlockDescriptors = arrayOfBlockDescriptors.length;
+    var index = 0;
+    var index2 = 0;
+    var j = 0;
+    var flash = function() {
+      // arrayOfBlockDescriptors[index].shape.fill( arrayOfBlockDescriptors[index].color );
+      if( index < numberOfBlockDescriptors ){
+        arrayOfBlockDescriptors[index].shape.fill( '#FFFFFF');
+        index ++;
+        arrayOfBlockDescriptors[index].shape.fill( '#000000');
+      }
+      else if ( index2 < numberOfBlockDescriptors ){
+        intervalID = setInterval( flash, 100 );
+        if( j < programArray.length ){
+        remainder = false;        
+        blockSize = Math.floor( programArray[j].size/4096 );
+          if( blockSize + index2 > numberOfBlockDescriptors ){
+            clearInterval(intervalID);
+            
+          }
+          if( programArray[j].size/4096 != 0 ){
+            remainder = true;
+            for(var k = 0; k < blockSize; k++){
+              arrayOfBlockDescriptors[index2].shape.fill( '#000000');
+              arrayOfBlockDescriptors[index2].shape.fill( '#FFFFFF');
+              index2++;
+            }
+          }
+          if( remainder ){
+            arrayOfBlockDescriptors[index2].shape.fill( '#000000');
+            arrayOfBlockDescriptors[index2].shape.fill( '#FF0000');
+            index2++;
+          }
+          else{
+            arrayOfBlockDescriptors[index2].shape.fill( '#000000');
+            arrayOfBlockDescriptors[index2].shape.fill( '#FFFFFF');
+            index2++;
+        }
+        j++;
+      }
+    }
+  }
+
+  var intervalID = setInterval( flash, 10 );
+
 
 //this will attempt to allocate the disk with memory
 //block size is 4 Kb
-    var index2 = 0;
-    var blockSize;
-    var remainder;
-    var fill = function( programList ){
+    /*var fill = function( programList ){
       for(var j = 0; j < programList.length; j++){
         remainder = false;
+
         blockSize = Math.floor( programList[j].size/4096 );
         if( blockSize + index2 > numberOfBlockDescriptors ){
           break;
@@ -270,13 +304,14 @@ var myGeometry = function() {
           index2++;
         }
       }
-    }
+    }*/
 
-//call the fill function so that it runs 
-//after the disk is cleaned
-  if( index >= numberOfBlockDescriptors ){
-    fill(programArray);
-  }
+    /*var running = true;
+    while( running ){
+      if( index >= numberOfBlockDescriptors ){
+        clearInterval(intervalID);
+        break;
+    }*/
 }; // myGeometry()
 
 var myDraw = function() {
